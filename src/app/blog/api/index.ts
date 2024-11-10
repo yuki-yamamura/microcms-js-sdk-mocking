@@ -1,12 +1,19 @@
-import { GetAllContentRequest } from "microcms-js-sdk";
-import { client } from "@/lib/microcms";
+import {
+  clientFactory,
+  CMSClient,
+  defaultParams,
+  GetAllParams,
+} from "@/lib/microcms";
 import { Post } from "../types";
 
+const blogClient = clientFactory(defaultParams)<Post>("blog");
+
 const getFormattedPosts = async (
-  params?: Omit<GetAllContentRequest, "endpoint">
+  params?: GetAllParams,
+  client?: CMSClient<Post>
 ) => {
-  const posts = await client.getAllContents<Post>({
-    endpoint: "blog",
+  const _client = client ?? blogClient;
+  const posts = await _client.getContents({
     ...params,
   });
 

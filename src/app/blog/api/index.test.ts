@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { http, HttpResponse } from "msw";
 import { server } from "@/mocks/node";
 import type { Post } from "@/app/blog/types";
-import { client, type GetAllParams } from "@/lib/microcms";
+import { clientFactory, type GetAllParams } from "@/lib/microcms";
 import { getFormattedPosts } from ".";
 
 const fakePosts: Post[] = [
@@ -33,6 +33,7 @@ const fakePosts: Post[] = [
 ];
 
 const serviceDomain = "serviceDomain";
+const apiKey = "apiKey";
 const apiName = "blog";
 
 describe("getFormattedPosts", () => {
@@ -58,12 +59,12 @@ describe("getFormattedPosts", () => {
         orders: "-publishedAt",
       },
     };
-    const spy = vi.spyOn(client, "getAllContents");
+    const mockClient = clientFactory({ serviceDomain, apiKey })<Post>(apiName);
+    const spy = vi.spyOn(mockClient, "getContents");
 
-    await getFormattedPosts(requestParams);
+    await getFormattedPosts(requestParams, mockClient);
 
     expect(spy).toHaveBeenCalledWith({
-      endpoint: apiName,
       ...requestParams,
     });
   });
