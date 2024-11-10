@@ -1,20 +1,19 @@
-import type { createClient, GetAllContentRequest } from "microcms-js-sdk";
-import type { Post } from "../types";
-import { client as defaultClient } from "@/lib/microcms";
+import { GetAllContentRequest } from "microcms-js-sdk";
+import { client } from "@/lib/microcms";
+import { Post } from "../types";
 
-const endpoint = "blog";
-
-type CMSClient = ReturnType<typeof createClient>;
-
-export const getFormattedPosts = async ({
-  client,
-  ...params
-}: Omit<GetAllContentRequest, "endpoint"> & { client?: CMSClient }) => {
-  const _client = client ?? defaultClient;
-  const posts = await _client.getAllContents<Post>({ endpoint, ...params });
+const getFormattedPosts = async (
+  params?: Omit<GetAllContentRequest, "endpoint">
+) => {
+  const posts = await client.getAllContents<Post>({
+    endpoint: "blog",
+    ...params,
+  });
 
   return posts.map((post) => ({
     ...post,
     title: `*${post.title}*`,
   }));
 };
+
+export { getFormattedPosts };

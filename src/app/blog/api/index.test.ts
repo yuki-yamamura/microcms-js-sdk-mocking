@@ -2,8 +2,8 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { http, HttpResponse } from "msw";
 import { server } from "@/mocks/node";
 import type { Post } from "@/app/blog/types";
+import { client, type GetAllParams } from "@/lib/microcms";
 import { getFormattedPosts } from ".";
-import { createClient, GetAllContentRequest } from "microcms-js-sdk";
 
 const fakePosts: Post[] = [
   {
@@ -33,7 +33,6 @@ const fakePosts: Post[] = [
 ];
 
 const serviceDomain = "serviceDomain";
-const apiKey = "apiKey";
 const apiName = "blog";
 
 describe("getFormattedPosts", () => {
@@ -53,28 +52,19 @@ describe("getFormattedPosts", () => {
     server.resetHandlers();
   });
 
-  test("should return list of post which title is surrounded by an asterisk", async () => {
-    const mockClient = createClient({ serviceDomain, apiKey });
-
-    const result = await getFormattedPosts({ client: mockClient });
-
-    expect(result[0].title).toBe("*post-3*");
-    expect(result[1].title).toBe("*post-2*");
-    expect(result[2].title).toBe("*post-1*");
-  });
-
   test("can be called with queries", async () => {
-    const mockClient = createClient({ serviceDomain, apiKey });
-    const requestParams: GetAllContentRequest = {
-      endpoint: apiName,
+    const requestParams: GetAllParams = {
       queries: {
         orders: "-publishedAt",
       },
     };
-    const spy = vi.spyOn(mockClient, "getAllContents");
+    const spy = vi.spyOn(client, "getAllContents");
 
-    await getFormattedPosts({ client: mockClient, ...requestParams });
+    await getFormattedPosts(requestParams);
 
-    expect(spy).toHaveBeenCalledWith(requestParams);
+    expect(spy).toHaveBeenCalledWith({
+      endpoint: apiName,
+      ...requestParams,
+    });
   });
 });
