@@ -1,26 +1,21 @@
-import {
-  clientFactory,
-  CMSClient,
-  defaultParams,
-  GetAllParams,
-} from "@/lib/microcms";
-import { Post } from "../types";
+import { CMSClient, CreateClientReturn, GetAllParams } from "@/lib/microcms";
+import type { Post } from "../types";
 
-const blogClient = clientFactory(defaultParams)<Post>("blog");
+class BlogClient extends CMSClient<Post> {
+  constructor(client?: CreateClientReturn) {
+    super("blog", client);
+  }
 
-const getFormattedPosts = async (
-  params?: GetAllParams,
-  client?: CMSClient<Post>
-) => {
-  const _client = client ?? blogClient;
-  const posts = await _client.getContents({
-    ...params,
-  });
+  getFormattedPosts = async (params?: GetAllParams) => {
+    const posts = await this.getContents(params);
 
-  return posts.map((post) => ({
-    ...post,
-    title: `*${post.title}*`,
-  }));
-};
+    return posts.map((post) => ({
+      ...post,
+      title: `*${post.title}*`,
+    }));
+  };
+}
 
-export { getFormattedPosts };
+const blogClient = new BlogClient();
+
+export { BlogClient, blogClient };
